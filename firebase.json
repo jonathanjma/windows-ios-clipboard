@@ -11,12 +11,16 @@
     ],
     "rewrites": [
       {
+        "source": "/api",
+        "function": "api"
+      },
+      {
         "source": "/get",
-        "function": "get_latest"
+        "function": "api"
       },
       {
         "source": "/push",
-        "function": "push_data"
+        "function": "api"
       }
     ]
   }

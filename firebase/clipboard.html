@@ -48,35 +48,36 @@
         // // 🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
 
         try {
-          let app = firebase.app();
-          let db = firebase.database();
-          let features = [
-            'database',
-          ].filter(feature => typeof app[feature] === 'function');
-          loadEl.textContent = `Firebase SDK loaded with ${features.join(', ')}`;
-
-
-          let regex_result = window.location.search.match('action=(.*?)(&|$)')
-          if (regex_result !== null) {
-            let action = regex_result[1]
-            console.log(action)
-
-            if (action === 'post') {
-              let value = decodeURI(window.location.search.match('value=(.*?)$')[1])
-              console.log(value)
-              db.ref('/').set({
-                latest_value: value
-              });
-            } else if (action === 'get') {
-              db.ref('/').get().then((data) => {
-                if (data.exists()) {
-                  console.log(data.val()['latest_value']);
-                } else {
-                  console.log("No data available");
-                }
-              });
-            }
-          }
+          // let app = firebase.app();
+          // let db = firebase.database();
+          // let features = [
+          //   'database',
+          // ].filter(feature => typeof app[feature] === 'function');
+          // loadEl.textContent = `Firebase SDK loaded with ${features.join(', ')}`;
+          //
+          // let regex_result = window.location.search.match('action=(.*?)&user=(.*?)(&|$)')
+          // if (regex_result !== null) {
+          //   let action = regex_result[1]
+          //   let user = regex_result[2]
+          //   console.log(action)
+          //   console.log(user)
+          //
+          //   if (action === 'push') {
+          //     let value = decodeURI(window.location.search.match('value=(.*?)$')[1])
+          //     console.log(value)
+          //     db.ref('/' + user).set({
+          //       latest_value: value
+          //     });
+          //   } else if (action === 'get') {
+          //     db.ref('/' + user).get().then(data => {
+          //       if (data.exists()) {
+          //         console.log(data.val()['latest_value']);
+          //       } else {
+          //         console.log('No data available');
+          //       }
+          //     });
+          //   }
+          // }
         } catch (e) {
           console.error(e);
           loadEl.textContent = 'Error loading the Firebase SDK, check the console.';

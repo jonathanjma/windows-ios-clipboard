@@ -1,0 +1,23 @@
+{
+  "hosting": {
+    "site": "win-ios-clipboard",
+    "public": "firebase",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**",
+      "**/.idea/**",
+      "**/python/**"
+    ],
+    "rewrites": [
+      {
+        "source": "/get",
+        "function": "get_latest"
+      },
+      {
+        "source": "/push",
+        "function": "push_data"
+      }
+    ]
+  }
+}

@@ -1,17 +1,22 @@
-import win32clipboard
+import pyclip
 import requests
 import pystray
 import PIL.Image
 import time
 from datetime import datetime
 
-username = 'sus_elephant@gmail.com'
+'''
+enter your email# (does not have to be your real one) and a password (can be anything you want) below
+push ios shortcut: https://www.icloud.com/shortcuts/03cdd508a6904e35a4b9f45e971fd3d1
+get ios shortcut: https://www.icloud.com/shortcuts/f210d8fe44c041ecb973604326f5db39
+'''
+email = 'sus_elephant@gmail.com'
 password = 'sussyamogus'
 
 def get_clipboard():
-    global icon, username, password
+    global icon, email, password
     start = datetime.now()
-    clip_response = requests.post('https://win-ios-clipboard.web.app/get', auth=(username, password))
+    clip_response = requests.post('https://win-ios-clipboard.web.app/get', auth=(email, password))
     if clip_response.status_code == 200:
         clip_response = clip_response.json()['latest_value']
         print(f'Clipboard Get took {(datetime.now()-start).microseconds/1000} ms')
@@ -19,23 +24,18 @@ def get_clipboard():
         print(clip_response)
         icon.notify('Received Item: ' + clip_response[:200], title='Windows-iOS Clipboard')
 
-        win32clipboard.OpenClipboard()
-        win32clipboard.EmptyClipboard()
-        win32clipboard.SetClipboardText(clip_response)
-        win32clipboard.CloseClipboard()
+        pyclip.copy(clip_response)
     else:
         print(f'Error {clip_response.status_code}')
         icon.notify('**An error has occurred** \nMake sure your email and password have been entered correctly',
                     title='Windows-iOS Clipboard')
 
 def push_clipboard():
-    global icon, username, password
-    win32clipboard.OpenClipboard()
-    clip_in = win32clipboard.GetClipboardData()
-    win32clipboard.CloseClipboard()
+    global icon, email, password
+    clip_in = pyclip.paste()
 
     start = datetime.now()
-    clip_response = requests.post('https://win-ios-clipboard.web.app/push', auth=(username, password),
+    clip_response = requests.post('https://win-ios-clipboard.web.app/push', auth=(email, password),
                                   data={'value': clip_in})
     if clip_response.status_code == 200:
         clip_response = clip_response.json()['latest_value']

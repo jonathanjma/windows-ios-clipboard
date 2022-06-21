@@ -22,11 +22,17 @@ module.exports = validateFirebaseIdToken = (req, res, next) => {
         let fetch_url = 'https://identitytoolkit.googleapis.com/v1/accounts:' + (signin ? 'signInWithPassword' : 'signUp')
             + '?key=AIzaSyBiGR8NanCX0sB5YSP1b2ulAmhtmsqaMPE'
         fetch(fetch_url, {method: 'post', body: JSON.stringify(body)})
-            .then(r => r.json())
-            .then(json => admin.auth().verifyIdToken(json['idToken']))
+            .then(r => {
+                if (r.status === 200) {
+                    return r.json()
+                } else {
+                    return Promise.reject('Invalid email/password')
+                }
+            })
+            // .then(json => admin.auth().verifyIdToken(json['idToken']))
             .then(token => {
-                console.log('ID Token successfully verified')
-                req.user = token
+                console.log('Credentials successfully verified')
+                req.user = {'email': body['email']}
                 if (signin) {
                     console.log(body['email'] + ' signed in')
                     next()
@@ -41,7 +47,7 @@ module.exports = validateFirebaseIdToken = (req, res, next) => {
                 }
             })
             .catch(err => {
-                console.error('Error while verifying Firebase ID token:', err)
+                console.error('Error while verifying credentials:', err)
                 res.status(403).send('Unauthorized')
             })
     })

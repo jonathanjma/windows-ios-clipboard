@@ -6,12 +6,12 @@ import time
 from datetime import datetime
 
 '''
-enter your email# (does not have to be your real one) and a password (can be anything you want) below
-push ios shortcut: https://www.icloud.com/shortcuts/03cdd508a6904e35a4b9f45e971fd3d1
-get ios shortcut: https://www.icloud.com/shortcuts/f210d8fe44c041ecb973604326f5db39
+enter your email (does not have to be your real one) and a password (can be anything you want) below
 '''
 email = 'sus_elephant@gmail.com'
 password = 'sussyamogus'
+
+''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
 def get_clipboard():
     global icon, email, password
@@ -19,7 +19,7 @@ def get_clipboard():
     clip_response = requests.post('https://win-ios-clipboard.web.app/get', auth=(email, password))
     if clip_response.status_code == 200:
         clip_response = clip_response.json()['latest_value']
-        print(f'Clipboard Get took {(datetime.now()-start).microseconds/1000} ms')
+        print(f'\nClipboard Get took {(datetime.now()-start).microseconds/1000} ms')
 
         print(clip_response)
         icon.notify('Received Item: ' + clip_response[:200], title='Windows-iOS Clipboard')
@@ -39,7 +39,7 @@ def push_clipboard():
                                   data={'value': clip_in})
     if clip_response.status_code == 200:
         clip_response = clip_response.json()['latest_value']
-        print(f'Clipboard Push took {(datetime.now()-start).microseconds/1000} ms')
+        print(f'\nClipboard Push took {(datetime.now()-start).microseconds/1000} ms')
 
         print(clip_response)
         icon.notify('Copied Item: ' + clip_response[:200], title='Windows-iOS Clipboard')
@@ -53,6 +53,8 @@ def quit():
     icon.notify('Quitting', title='Windows-iOS Clipboard')
     time.sleep(3)
     icon.stop()
+
+print('Starting clipboard...')
 
 image = PIL.Image.open('clipboard.png')
 

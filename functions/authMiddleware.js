@@ -1,5 +1,6 @@
 const admin = require('firebase-admin')
 const fetch = require('node-fetch')
+const apiKey = require('./env')
 
 module.exports = validateFirebaseIdToken = (req, res, next) => {
 
@@ -20,7 +21,7 @@ module.exports = validateFirebaseIdToken = (req, res, next) => {
         let signin = users.length !== 0 && users.includes(body['email'])
         console.log((signin ? 'signing in ' : 'registering ') + body['email'])
         let fetch_url = 'https://identitytoolkit.googleapis.com/v1/accounts:' + (signin ? 'signInWithPassword' : 'signUp')
-            + '?key=AIzaSyBiGR8NanCX0sB5YSP1b2ulAmhtmsqaMPE'
+            + '?key=' + apiKey
         fetch(fetch_url, {method: 'post', body: JSON.stringify(body)})
             .then(r => {
                 if (r.status === 200) {

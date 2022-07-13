@@ -1,8 +1,8 @@
 '''
 enter an email and a password (which can be anything you want) below
 '''
-email = 'sus_elephant@gmail.com'
-password = 'sussyamogus'
+email = 'replace with email'
+password = 'replace with password'
 
 ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 

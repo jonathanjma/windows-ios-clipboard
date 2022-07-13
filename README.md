@@ -27,9 +27,10 @@ A universal clipboard that allows for easier copying and pasting across differen
 (if you would like to implement a client in another language)
 
 All endpoints
+- Base url: https://win-ios-clipboard.web.app
 - Authentication: basic http authentication required (adding an 'authorization' header with the format- ```Basic username:password```)
   - 403 unauthorized returned if authentication not successful
-- Must use post requests
+- Must use POST request
 
 /api
 - shows basic api info (name, version, author)

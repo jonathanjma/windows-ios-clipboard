@@ -40,7 +40,7 @@ module.exports = validateFirebaseIdToken = (req, res, next) => {
                 } else {
                     return admin.database().ref('users').push().set({
                         'email': body['email'],
-                        'latest_value': ''
+                        'value': ''
                     }).then(() => {
                         console.log(body['email'] + ' registered')
                         next()

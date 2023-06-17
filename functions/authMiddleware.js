@@ -31,15 +31,16 @@ module.exports = validateFirebaseIdToken = (req, res, next) => {
                 }
             })
             // .then(json => admin.auth().verifyIdToken(json['idToken']))
-            .then(token => {
+            .then(res => {
                 console.log('Credentials successfully verified')
-                req.user = {'email': body['email']}
+                req.user = {'email': body['email'], 'uid': res['localId']}
                 if (signin) {
                     console.log(body['email'] + ' signed in')
                     next()
                 } else {
                     return admin.database().ref('users').push().set({
                         'email': body['email'],
+                        'file': false,
                         'value': ''
                     }).then(() => {
                         console.log(body['email'] + ' registered')

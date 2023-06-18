@@ -2,7 +2,7 @@
 
 A universal clipboard that allows for easier copying and pasting across different operating systems (ex. windows-iOS, linux-iOS, windows-linux, etc).
 
-### How to Use
+## How to Use
 1. Download the
    - Python script (for windows, linux, macOS):
      - Download the ```win-ios-clipboard.zip``` zipped folder from the [releases page](https://github.com/jonathanjma/windows-ios-clipboard/releases/latest)
@@ -23,23 +23,32 @@ A universal clipboard that allows for easier copying and pasting across differen
    - Python script: you can have the clipboard auto start on windows startup by navigating to ```shell:startup``` in windows explorer and creating a ```.cmd``` file with the contents ```start pythonw <path of desktop_script.py>``` (make sure to substitute the correct filepath)
    - Shortcuts: to add the shortcuts to your home screen for easy access, you can find that option by clicking on the icon right next to the 'x' or 'Done' button in the edit shortcut view
 
-### API Info 
-(if you would like to implement a client in another language)
+## API Info
+Information about the Windows-iOS Clipboard API is provided below 
+(useful if you would like to implement an API client in another language)
 
-All endpoints
 - Base url: https://win-ios-clipboard.web.app
-- Authentication: basic http authentication required (adding an 'authorization' header with the format- ```Basic username:password```)
-  - 403 unauthorized returned if authentication not successful
-- Must use POST request
+- Authentication: Basic HTTP authentication required 
+  - ```Authorization``` header with the base64 encoded string ```Basic <username>:<password>```
 
-/api
-- shows basic api info (name, version, author)
+### Endpoints
+/api (GET)
+- Shows basic API info (ex. name, version, author)
 
-/get
-- returns latest clipboard entry in json format under the key ```latest_value```
-  - for example: ```{'latest_value': <latest clipboard value>}```
+/paste (GET)
+- Returns the last value copied onto the clipboard
+- Data is returned in 2 ways depending on the last copied value:
+  - Text: returned with ```Content-Type: application/json``` (so JSON format) under the key ```value```
+    - example: ```{'value': <latest clipboard value>}```
+  - File: returned in the body of the HTTP response with the ```Content-Type``` header set to the MIME type of the copied file
+    - example: if a PNG file was the last copied value, ```Content-Type: image/png``` and the image would be sent in the body of the response
 
-/push
-- updates latest clipboard entry
-- new clipboard entry show be a json payload with the value under the key ```value```
-  - for example: ```{'value': <new clipboard value>}```
+/copy (POST)
+- Updates the latest clipboard entry
+- Data must be sent using ```Content-Type: multipart/form-data```:
+  - Text should be sent under the key ```value```
+  - Files should be sent under the key ```value```
+- Notes:
+  - If both text and a file is sent, only the text is copied to the clipboard
+  - Only 1 file can be sent at a time
+  - Max file size limit is 10 MB

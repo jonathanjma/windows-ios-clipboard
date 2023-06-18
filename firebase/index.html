@@ -6,22 +6,22 @@
     <title>Welcome to Firebase Hosting</title>
 
     <!-- update the version number as needed -->
-    <script defer src="/__/firebase/9.8.3/firebase-app-compat.js"></script>
+<!--    <script defer src="/__/firebase/9.8.3/firebase-app-compat.js"></script>-->
     <!-- include only the Firebase features as you need -->
-    <script defer src="/__/firebase/9.8.3/firebase-auth-compat.js"></script>
-    <script defer src="/__/firebase/9.8.3/firebase-database-compat.js"></script>
-    <script defer src="/__/firebase/9.8.3/firebase-firestore-compat.js"></script>
-    <script defer src="/__/firebase/9.8.3/firebase-functions-compat.js"></script>
-    <script defer src="/__/firebase/9.8.3/firebase-messaging-compat.js"></script>
-    <script defer src="/__/firebase/9.8.3/firebase-storage-compat.js"></script>
-    <script defer src="/__/firebase/9.8.3/firebase-analytics-compat.js"></script>
-    <script defer src="/__/firebase/9.8.3/firebase-remote-config-compat.js"></script>
-    <script defer src="/__/firebase/9.8.3/firebase-performance-compat.js"></script>
+<!--    <script defer src="/__/firebase/9.8.3/firebase-auth-compat.js"></script>-->
+<!--    <script defer src="/__/firebase/9.8.3/firebase-database-compat.js"></script>-->
+<!--    <script defer src="/__/firebase/9.8.3/firebase-firestore-compat.js"></script>-->
+<!--    <script defer src="/__/firebase/9.8.3/firebase-functions-compat.js"></script>-->
+<!--    <script defer src="/__/firebase/9.8.3/firebase-messaging-compat.js"></script>-->
+<!--    <script defer src="/__/firebase/9.8.3/firebase-storage-compat.js"></script>-->
+<!--    <script defer src="/__/firebase/9.8.3/firebase-analytics-compat.js"></script>-->
+<!--    <script defer src="/__/firebase/9.8.3/firebase-remote-config-compat.js"></script>-->
+<!--    <script defer src="/__/firebase/9.8.3/firebase-performance-compat.js"></script>-->
     <!-- 
       initialize the SDK after all desired features are loaded, set useEmulator to false
       to avoid connecting the SDK to running emulators.
     -->
-    <script defer src="/__/firebase/init.js?useEmulator=true"></script>
+<!--    <script defer src="/__/firebase/init.js?useEmulator=true"></script>-->
 
     <style media="screen">
       body { background: #ECEFF1; color: rgba(0,0,0,0.87); font-family: Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 0; }
@@ -65,25 +65,25 @@
         //
         // // 🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
 
-        try {
-          let app = firebase.app();
-          let db = firebase.database();
-          let features = [
-            'auth',
-            'database',
-            'firestore',
-            'functions',
-            'messaging',
-            'storage',
-            'analytics',
-            'remoteConfig',
-            'performance',
-          ].filter(feature => typeof app[feature] === 'function');
-          loadEl.textContent = `Firebase SDK loaded with ${features.join(', ')}`;
-        } catch (e) {
-          console.error(e);
-          loadEl.textContent = 'Error loading the Firebase SDK, check the console.';
-        }
+        // try {
+        //   let app = firebase.app();
+        //   let db = firebase.database();
+        //   let features = [
+        //     'auth',
+        //     'database',
+        //     'firestore',
+        //     'functions',
+        //     'messaging',
+        //     'storage',
+        //     'analytics',
+        //     'remoteConfig',
+        //     'performance',
+        //   ].filter(feature => typeof app[feature] === 'function');
+        //   loadEl.textContent = `Firebase SDK loaded with ${features.join(', ')}`;
+        // } catch (e) {
+        //   console.error(e);
+        //   loadEl.textContent = 'Error loading the Firebase SDK, check the console.';
+        // }
       });
     </script>
   </body>

@@ -9,54 +9,110 @@ password = 'replace with password'
 import sys
 import subprocess
 
+deps = ['pyclip', 'pyjpgclipboard', 'pystray', 'Pillow', 'requests']
+
 # install dependencies if they are not already installed
 def setup():
     reqs = str(subprocess.check_output([sys.executable, '-m', 'pip', 'freeze']))
-    if not ('pyclip' in reqs and 'pystray' in reqs and 'requests' in reqs):
-        print('installing reqs')
-        subprocess.check_call([sys.executable, '-m', 'pip', 'install', 'pyclip', 'requests', 'pystray'])
-    else:
-        print('all reqs installed')
+    for dep in deps:
+        if dep not in reqs:
+            print('installing package: ' + dep)
+            subprocess.check_call([sys.executable, '-m', 'pip', 'install', dep])
 
 setup()
 
 import pyclip
+import pyjpgclipboard
 import requests
 import pystray
-from PIL import Image
+from PIL import Image, ImageGrab
+from pyclip.win_clip import UnparsableClipboardFormatException
 from io import BytesIO
 import base64
 import time
+import tempfile
 from datetime import datetime
+from pathlib import Path
 
-# get latest clipboard data
-def get_clipboard():
+baseUrl = 'https://win-ios-clipboard.web.app'
+# baseUrl = 'http://127.0.0.1:5001/win-ios-clipboard/us-central1/api'
+
+# get latest data from clipboard
+def clipboard_paste():
     global icon, email, password
     start = datetime.now()
-    clip_response = requests.post('https://win-ios-clipboard.web.app/get', auth=(email, password))
+    clip_response = requests.get(baseUrl + '/paste', auth=(email, password))
     if clip_response.status_code == 200:
-        clip_response = clip_response.json()['latest_value']
+        content_type = clip_response.headers.get('Content-Type')
+        if 'application/json' in content_type:
+            text_value = clip_response.json()['value']
+            print(text_value)
+
+            icon.notify('Received Item: ' + text_value[:200], title='Windows-iOS Clipboard')
+            pyclip.copy(text_value)
+        else:
+            file_name = '/paste.' + clip_response.headers.get('File-Extension')
+            print(file_name)
+            if 'png' in file_name or 'jpg' in file_name or 'jpeg' in file_name:
+                with open(tempfile.gettempdir() + file_name, 'wb') as fd:
+                    for chunk in clip_response.iter_content(chunk_size=128):
+                        fd.write(chunk)
+                img = Image.open(tempfile.gettempdir() + file_name)
+                output = BytesIO()
+                img.convert("RGB").save(output, "BMP")
+                data = output.getvalue()[14:]
+                output.close()
+                with open(tempfile.gettempdir() + file_name, 'wb') as f:
+                    f.write(data)
+                pyjpgclipboard.clipboard_load_jpg(tempfile.gettempdir() + '/paste.png')
+            else:
+                with open(str(Path.home() / "Downloads") + file_name, 'wb') as fd:
+                    for chunk in clip_response.iter_content(chunk_size=128):
+                        fd.write(chunk)
+            icon.notify(clip_response.headers.get('Content-Type'))
+
         print(f'\nClipboard Get took {(datetime.now()-start).microseconds/1000} ms')
-
-        print(clip_response)
-        icon.notify('Received Item: ' + clip_response[:200], title='Windows-iOS Clipboard')
-
-        pyclip.copy(clip_response)
     else:
         print(f'Error {clip_response.status_code}')
         icon.notify('**An error has occurred** \nMake sure your email and password have been entered correctly',
                     title='Windows-iOS Clipboard')
 
-# push new clipboard item
-def push_clipboard():
+# copy new item to the clipboard
+def clipboard_copy():
     global icon, email, password
-    clip_in = pyclip.paste()
-
     start = datetime.now()
-    clip_response = requests.post('https://win-ios-clipboard.web.app/push', auth=(email, password),
-                                  data={'value': clip_in})
+
+    try:
+        clip_in = pyclip.paste()
+    except UnparsableClipboardFormatException:
+        # Use pyjpgclipboard to dump screenshot from clipboard
+        print("pyclip failed, attempting Pillow ImageGrab")
+        try:
+            img = ImageGrab.grabclipboard()
+            img.save(tempfile.gettempdir() + '/copy.png', 'PNG')
+            with open(tempfile.gettempdir() + '/copy.png', 'rb') as f:
+                clip_in = f.read()
+        except TypeError:
+            icon.notify("Clipboard Format Unsupported")
+            return
+
+    # can't tell if a text file is copied because pyclip.paste() returns the file contents
+    binary_file = False
+    try:
+        clip_in.decode("utf-8")
+    except UnicodeDecodeError:
+        print('binary file')
+        binary_file = True
+
+    if not binary_file:
+        clip_response = requests.post(baseUrl + '/copy', auth=(email, password),
+                                      data={'value': clip_in})
+    else:
+        clip_response = requests.post(baseUrl + '/copy', auth=(email, password),
+                                      files={'value': clip_in})
+
     if clip_response.status_code == 200:
-        clip_response = clip_response.json()['latest_value']
+        clip_response = clip_response.json()['value']
         print(f'\nClipboard Push took {(datetime.now()-start).microseconds/1000} ms')
 
         print(clip_response)
@@ -82,8 +138,8 @@ image = Image.open(BytesIO(base64.b64decode('iVBORw0KGgoAAAANSUhEUgAAAOEAAADhCAY
 
 # setup and start tray icon
 menu = pystray.Menu(
-    pystray.MenuItem('Get Clipboard', get_clipboard),
-    pystray.MenuItem('Push Clipboard', push_clipboard),
+    pystray.MenuItem('Clipboard Copy', clipboard_copy),
+    pystray.MenuItem('Clipboard Paste', clipboard_paste),
     pystray.Menu.SEPARATOR,
     pystray.MenuItem('Quit', quit)
 )

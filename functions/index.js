@@ -6,7 +6,7 @@ const {getDatabase} = require("firebase-admin/database");
 const express = require('express')
 const authMiddleware = require('./authMiddleware')
 const formMiddleware = require("./formMiddleware");
-const mime = require("mime")
+const FileType = require('file-type');
 
 // https://cloud.google.com/nodejs/docs/reference/storage/latest
 // https://github.com/googleapis/nodejs-storage/blob/main/samples/uploadFromMemory.js
@@ -19,7 +19,7 @@ const bucketName = 'win-ios-clipboard.appspot.com'
 const app = express()
 
 // Get API info endpoint
-app.get('/', async (req, res) => {
+app.get('/api', async (req, res) => {
     res.status(200).send(
         {'name': 'Windows-iOS Clipboard', 'version': '3.0', 'author': 'Jonathan Ma'}
     )
@@ -40,9 +40,13 @@ app.get('/paste', authMiddleware, async (req, res) => {
         } else {
             // download file from Storage
             const contents = await storage.bucket(bucketName).file(uid).download();
+            const fileBuf = contents[0]
+            const mimeType = await FileType.fromBuffer(fileBuf)
+            console.log(mimeType)
             // set MIME type using file extension
-            res.set('Content-Type', mime.getType(userData['value'].split('.')[1]))
-            res.status(200).send(contents[0])
+            res.set('Content-Type', mimeType['mime'])
+            res.set('File-Extension', mimeType['ext'])
+            res.status(200).send(fileBuf)
         }
     })
 })

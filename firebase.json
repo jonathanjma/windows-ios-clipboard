@@ -11,15 +11,15 @@
     ],
     "rewrites": [
       {
-        "source": "/",
+        "source": "/api",
         "function": "api"
       },
       {
-        "source": "/get",
+        "source": "/paste",
         "function": "api"
       },
       {
-        "source": "/push",
+        "source": "/copy",
         "function": "api"
       }
     ]

@@ -1,7 +1,6 @@
 const functions = require('firebase-functions')
 const admin = require('firebase-admin')
 const {Storage} = require('@google-cloud/storage');
-const {getDatabase} = require("firebase-admin/database");
 
 const express = require('express')
 const authMiddleware = require('./authMiddleware')
@@ -9,7 +8,6 @@ const formMiddleware = require("./formMiddleware");
 const FileType = require('file-type');
 
 // https://cloud.google.com/nodejs/docs/reference/storage/latest
-// https://github.com/googleapis/nodejs-storage/blob/main/samples/uploadFromMemory.js
 // https://firebase.google.com/docs/functions/2nd-gen-upgrade
 
 admin.initializeApp()
@@ -27,62 +25,54 @@ app.get('/api', async (req, res) => {
 
 // Paste clipboard content endpoint
 app.get('/paste', authMiddleware, async (req, res) => {
-    let [email, uid] = [req.user['email'], req.user['uid']] // set by authMiddleware
-    console.log(uid + ' getting clipboard')
+    console.log('pasting clipboard')
 
-    // get user data from database
-    let query = await getDatabase().ref('/users').orderByChild('email').equalTo(email)
-    query.on('child_added', async childObj => {
-        let userData = childObj.toJSON()
-        // determine whether to return text value or file
-        if (!userData['file']) {
-            return res.status(200).send({'value': userData['value']})
-        } else {
-            // download file from Storage
-            const contents = await storage.bucket(bucketName).file(uid).download();
-            const fileBuf = contents[0]
-            const mimeType = await FileType.fromBuffer(fileBuf)
-            console.log(mimeType)
-            // set MIME type using file extension
-            res.set('Content-Type', mimeType['mime'])
-            res.set('File-Extension', mimeType['ext'])
-            res.status(200).send(fileBuf)
-        }
-    })
+    // get user data from database (set by authMiddleware)
+    const data = req.data
+
+    // determine whether to return text value or file
+    if (!data['file']) {
+        return res.status(200).send({'value': data['value']})
+    } else {
+        // download file from Storage
+        const contents = await storage.bucket(bucketName).file(data['uid']).download();
+        const fileBuf = contents[0]
+        const mimeType = await FileType.fromBuffer(fileBuf)
+        console.log(mimeType)
+        // set MIME type and file extension
+        res.set('Content-Type', mimeType['mime'])
+        res.set('File-Extension', mimeType['ext'])
+        return res.status(200).send(fileBuf)
+    }
 })
 
 // Copy clipboard content endpoint
 app.post('/copy', authMiddleware, formMiddleware, async (req, res) => {
-    let [email, uid] = [req.user['email'], req.user['uid']] // set by authMiddleware
-    console.log(uid + ' getting clipboard')
+   console.log('copying clipboard')
+
+    const data = req.data // set by authMiddleware
 
     // helper function for updating stored value in database
     const updateDb = async (value, file) => {
-        let query = await getDatabase().ref('/users').orderByChild('email').equalTo(email)
-        query.on('child_added', childObj => {
-            childObj.ref.update({
-                'file': file,
-                'value': value
-            }, (error) => {
-                if (error) {
-                    return res.status(500).send('Data could not be saved.' + error);
-                } else {
-                    return res.status(200).send({'value': value});
-                }
-            })
+        await req.ref.update({
+            file: file,
+            value: value
+        }).catch(error => {
+            return res.status(500).send('Data could not be saved.' + error)
         })
+        return res.status(200).send({'value': value});
     }
 
     // prioritize text value over file if both are sent
-    let textValue = req.body['value']
+    const textValue = req.body['value']
     if (textValue !== undefined) {
         await updateDb(textValue, false)
     } else if (req.files.length !== 0) {
         let file = req.files[0]
-        console.log(file)
+        // console.log(file)
 
         // upload file to Storage using the user's ID as the filename
-        await storage.bucket(bucketName).file(uid).save(file['buffer'])
+        await storage.bucket(bucketName).file(data['uid']).save(file['buffer'])
             .catch((e) => {
                 console.log(e);
                 return res.status(500).send('File upload failed.');

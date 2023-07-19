@@ -5,7 +5,8 @@ A universal clipboard that allows for easier copying and pasting across differen
 ## How to Use
 1. Download the
    - Python script (for windows, linux, macOS):
-     - Download the ```win-ios-clipboard.zip``` zipped folder from the [releases page](https://github.com/jonathanjma/windows-ios-clipboard/releases/latest)
+     - Download ```win-ios-clipboard.zip``` from the [releases page](https://github.com/jonathanjma/windows-ios-clipboard/releases/latest)
+     - If Python is not installed on your computer, download the latest version [here](https://www.python.org/downloads/) and install it
    - Apple shortcut (for iOS, iPadOS, macOS):
      - _Clipboard Copy_ shortcut: https://www.icloud.com/shortcuts/200add8cdf1a4a32b46fd9aaa57f77ab
      - _Clipboard Paste_ shortcut: https://www.icloud.com/shortcuts/bae2c9978bad4c1fb9356c743b518992

@@ -1,10 +1,10 @@
 """
-enter an email and a password (which can be anything you want) below
-make sure to use the same login info across all your devices
+Enter an email and a password by replacing the text in the "email" and "password" fields below.
+Can can be anything you want, just make sure to use the same login info across all your devices.
 """
 
-email = 'replace with email'
-password = 'replace with password'
+email = "replace with email"
+password = "replace with password"
 
 ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 

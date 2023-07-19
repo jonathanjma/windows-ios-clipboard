@@ -1,21 +1,21 @@
 # Windows-iOS Clipboard
 
-A universal clipboard that allows for easier copying and pasting across different operating systems (ex. windows-iOS, linux-iOS, windows-linux, etc).
+A universal clipboard that allows for easier copying and pasting of text, images, and files across different operating systems (ex. Windows-iOS, Linux-iOS, Windows-Linux, etc).
 
 ## How to Use
 1. Download the
-   - Python script (for windows, linux, macOS):
+   - Python script (for Windows, Linux, macOS):
      - Download ```win-ios-clipboard.zip``` from the [releases page](https://github.com/jonathanjma/windows-ios-clipboard/releases/latest)
      - If Python is not installed on your computer, download the latest version [here](https://www.python.org/downloads/) and install it
    - Apple shortcut (for iOS, iPadOS, macOS):
      - _Clipboard Copy_ shortcut: https://www.icloud.com/shortcuts/200add8cdf1a4a32b46fd9aaa57f77ab
      - _Clipboard Paste_ shortcut: https://www.icloud.com/shortcuts/bae2c9978bad4c1fb9356c743b518992
-2. Unzip the python script and/or add the Apple shortcut to the Shortcuts app
+2. Unzip the Python script and/or add the Apple shortcut to the Shortcuts app
 3. Enter your email and create a password in the appropriate fields
    - Python script: open ```desktop_script.py``` in any text editor and save the file when you are done
    - Shortcuts: click 3 dots in the top-right corner of the _Copy_ **and** _Paste_ shortcut tiles
 4. To run the clipboard
-   - Python script: Run the ```run_clipboard.cmd``` script for windows or ```run_clipboard.sh``` for linux/macOS
+   - Python script: Run the ```run_clipboard.cmd``` script for windows or ```run_clipboard.sh``` for Linux/macOS
      - This should create a tray icon you can right-click to copy and paste from your clipboard
    - Shortcuts: 
      - Tap on the appropriate _Copy_ or _Paste_ shortcut in the Shortcuts app (or see below for adding them to your home screen)

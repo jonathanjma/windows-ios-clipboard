@@ -1,6 +1,8 @@
-'''
+"""
 enter an email and a password (which can be anything you want) below
-'''
+make sure to use the same login info across all your devices
+"""
+
 email = 'replace with email'
 password = 'replace with password'
 
@@ -9,9 +11,8 @@ password = 'replace with password'
 import sys
 import subprocess
 
-deps = ['pyclip', 'pyjpgclipboard', 'pystray', 'Pillow', 'requests']
-
 # install dependencies if they are not already installed
+deps = ['pyclip', 'pyjpgclipboard', 'pystray', 'Pillow', 'requests', 'pillow-heif']
 def setup():
     reqs = str(subprocess.check_output([sys.executable, '-m', 'pip', 'freeze']))
     for dep in deps:
@@ -26,6 +27,7 @@ import pyjpgclipboard
 import requests
 import pystray
 from PIL import Image, ImageGrab
+from pillow_heif import register_heif_opener
 from pyclip.win_clip import UnparsableClipboardFormatException
 from io import BytesIO
 import base64
@@ -37,55 +39,67 @@ from pathlib import Path
 baseUrl = 'https://win-ios-clipboard.web.app'
 # baseUrl = 'http://127.0.0.1:5001/win-ios-clipboard/us-central1/api'
 
-# get latest data from clipboard
+# paste data from clipboard
 def clipboard_paste():
     global icon, email, password
     start = datetime.now()
     clip_response = requests.get(baseUrl + '/paste', auth=(email, password))
     if clip_response.status_code == 200:
         content_type = clip_response.headers.get('Content-Type')
+
+        # clipboard has text value
         if 'application/json' in content_type:
             text_value = clip_response.json()['value']
             print(text_value)
 
-            icon.notify('Received Item: ' + text_value[:200], title='Windows-iOS Clipboard')
+            icon.notify('Received Item: ' + text_value[:200])
             pyclip.copy(text_value)
+
+        # clipboard has file value
         else:
-            file_name = '/paste.' + clip_response.headers.get('File-Extension')
-            print(file_name)
-            if 'png' in file_name or 'jpg' in file_name or 'jpeg' in file_name:
-                with open(tempfile.gettempdir() + file_name, 'wb') as fd:
+            file_ext = clip_response.headers.get('File-Extension')
+            file_path = '/paste.' + file_ext
+            # if file is image, copy it to the clipboard
+            if file_ext in ['png', 'jpg', 'jpeg', 'heic']:
+                file_path = tempfile.gettempdir() + file_path
+                # read file from http response
+                with open(file_path, 'wb') as fd:
                     for chunk in clip_response.iter_content(chunk_size=128):
                         fd.write(chunk)
-                img = Image.open(tempfile.gettempdir() + file_name)
+                # convert file so that it can be copied to the clipboard
+                img = Image.open(file_path)
                 output = BytesIO()
                 img.convert("RGB").save(output, "BMP")
                 data = output.getvalue()[14:]
                 output.close()
-                with open(tempfile.gettempdir() + file_name, 'wb') as f:
+                # save converted file and copy it to the clipboard
+                with open(file_path, 'wb') as f:
                     f.write(data)
-                pyjpgclipboard.clipboard_load_jpg(tempfile.gettempdir() + '/paste.png')
+                pyjpgclipboard.clipboard_load_jpg(file_path)
+                icon.notify('Copied image to clipboard')
+
+            # for any other file, save it to the user's downloads folder
             else:
-                with open(str(Path.home() / "Downloads") + file_name, 'wb') as fd:
+                with open(str(Path.home() / "Downloads") + file_path, 'wb') as fd:
                     for chunk in clip_response.iter_content(chunk_size=128):
                         fd.write(chunk)
-            icon.notify(clip_response.headers.get('Content-Type'))
+                icon.notify('Saved file to downloads folder')
 
-        print(f'\nClipboard Get took {(datetime.now()-start).microseconds/1000} ms')
+        print(f'\nClipboard Paste took {(datetime.now()-start).microseconds/1000} ms')
     else:
         print(f'Error {clip_response.status_code}')
-        icon.notify('**An error has occurred** \nMake sure your email and password have been entered correctly',
-                    title='Windows-iOS Clipboard')
+        icon.notify('**An error has occurred** \nMake sure your email and password have been entered correctly')
 
 # copy new item to the clipboard
 def clipboard_copy():
     global icon, email, password
     start = datetime.now()
 
+    # attempt default clipboard paste (works for text and file explorer file copying)
     try:
         clip_in = pyclip.paste()
     except UnparsableClipboardFormatException:
-        # Use pyjpgclipboard to dump screenshot from clipboard
+        # use Pillow to paste screenshot from clipboard
         print("pyclip failed, attempting Pillow ImageGrab")
         try:
             img = ImageGrab.grabclipboard()
@@ -96,7 +110,8 @@ def clipboard_copy():
             icon.notify("Clipboard Format Unsupported")
             return
 
-    # can't tell if a text file is copied because pyclip.paste() returns the file contents
+    # check if binary file is copied by converting input to text
+    # can't tell if a text file is copied because pyclip.paste() only returns file contents
     binary_file = False
     try:
         clip_in.decode("utf-8")
@@ -113,22 +128,26 @@ def clipboard_copy():
 
     if clip_response.status_code == 200:
         clip_response = clip_response.json()['value']
-        print(f'\nClipboard Push took {(datetime.now()-start).microseconds/1000} ms')
+        print(f'\nClipboard Copy took {(datetime.now()-start).microseconds/1000} ms')
 
-        print(clip_response)
-        icon.notify('Copied Item: ' + clip_response[:200], title='Windows-iOS Clipboard')
+        if not binary_file:
+            print(clip_response)
+            icon.notify('Copied Item: ' + clip_response[:200])
+        else:
+            icon.notify('Copied file to clipboard')
     else:
         print(f'Error {clip_response.status_code}')
-        icon.notify('**An error has occurred** \nMake sure your email and password have been entered correctly',
-                    title='Windows-iOS Clipboard')
+        icon.notify('**An error has occurred** \nMake sure your email and password have been entered correctly')
 
 def quit():
     global icon
-    icon.notify('Quitting', title='Windows-iOS Clipboard')
+    icon.notify('Quitting')
     time.sleep(3)
     icon.stop()
 
 print('Starting clipboard...')
+
+register_heif_opener() # allows Pillow to handle heic files during pasting
 
 # encode icon as base64 to avoid file path issues
 image = Image.open(BytesIO(base64.b64decode('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'

@@ -39,7 +39,6 @@ module.exports = async (req, res, next) => {
         }
         // create password hash
         const hash = await bcrypt.hash(password, 10);
-        // validate email?
         req.data = {
             email: email,
             password_hash: hash,
